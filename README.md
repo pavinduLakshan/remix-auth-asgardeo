@@ -63,7 +63,7 @@ export default function Login() {
 // app/routes/auth.asgardeo.tsx
 import type { ActionFunctionArgs } from "@remix-run/node";
 
-import { authenticator } from "~/utils/auth.server";
+import { authenticator } from "~/utils/asgardeo.server";
 
 export let loader = () => redirect("/login");
 
@@ -76,7 +76,7 @@ export let action = ({ request }: ActionFunctionArgs) => {
 // app/routes/auth.asgardeo.callback.tsx
 import type { LoaderFunctionArgs } from "@remix-run/node";
 
-import { authenticator } from "~/utils/auth.server";
+import { authenticator } from "~/utils/asgardeo.server";
 
 export let loader = ({ request }: LoaderFunctionArgs) => {
   return authenticator.authenticate("asgardeo", request, {
@@ -92,7 +92,7 @@ import type { ActionFunctionArgs } from "@remix-run/node";
 
 import { redirect } from "@remix-run/node";
 
-import { destroySession, getSession } from "~/utils/auth.server";
+import { destroySession, getSession } from "~/utils/asgardeo.server";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const session = await getSession(request.headers.get("Cookie"));
