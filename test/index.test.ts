@@ -27,7 +27,7 @@ describe(AsgardeoStrategy, () => {
   test("should allow changing the scope", async () => {
     let strategy = new AsgardeoStrategy(
       {
-        baseUrl: "https://api.asgardeo.io/t/pavinduorg",
+        baseUrl: "https://api.asgardeo.io/t/demoorg",
         clientID: "CLIENT_ID",
         clientSecret: "CLIENT_SECRET",
         authorizedRedirectUrl: "https://example.app/callback",
@@ -55,7 +55,7 @@ describe(AsgardeoStrategy, () => {
   test("should have the scope `openid profile email` as default", async () => {
     let strategy = new AsgardeoStrategy(
       {
-        baseUrl: "https://api.asgardeo.io/t/paviduorg",
+        baseUrl: "https://api.asgardeo.io/t/demoorg",
         clientID: "CLIENT_ID",
         clientSecret: "CLIENT_SECRET",
         authorizedRedirectUrl: "https://example.app/callback",
@@ -84,7 +84,7 @@ describe(AsgardeoStrategy, () => {
   test("should correctly format the authorization URL", async () => {
     let strategy = new AsgardeoStrategy(
       {
-        baseUrl: "https://api.asgardeo.io/t/paviduorg",
+        baseUrl: "https://api.asgardeo.io/t/demoorg",
         clientID: "CLIENT_ID",
         clientSecret: "CLIENT_SECRET",
         authorizedRedirectUrl: "https://example.app/callback",
@@ -105,15 +105,15 @@ describe(AsgardeoStrategy, () => {
 
       let redirectUrl = new URL(location);
 
-      expect(redirectUrl.hostname).toBe("test.fake.Asgardeo.com");
-      expect(redirectUrl.pathname).toBe("/authorize");
+      expect(redirectUrl.hostname).toBe("api.asgardeo.io");
+      expect(redirectUrl.pathname).toBe("/t/demoorg/oauth2/authorize");
     }
   });
 
   test("should allow changing the audience", async () => {
     let strategy = new AsgardeoStrategy(
       {
-        baseUrl: "https://api.asgardeo.io/t/paviduorg",
+        baseUrl: "https://api.asgardeo.io/t/demoorg",
         clientID: "CLIENT_ID",
         clientSecret: "CLIENT_SECRET",
         authorizedRedirectUrl: "https://example.app/callback",
@@ -142,7 +142,7 @@ describe(AsgardeoStrategy, () => {
   test("should allow changing the organization", async () => {
     let strategy = new AsgardeoStrategy(
       {
-        baseUrl: "https://api.asgardeo.io/t/paviduorg",
+        baseUrl: "https://api.asgardeo.io/t/demoorg",
         clientID: "CLIENT_ID",
         clientSecret: "CLIENT_SECRET",
         authorizedRedirectUrl: "https://example.app/callback",
@@ -172,7 +172,7 @@ describe(AsgardeoStrategy, () => {
   test("should not fetch user profile when openid scope is not present", async () => {
     let strategy = new AsgardeoStrategy(
       {
-        baseUrl: "https://api.asgardeo.io/t/paviduorg",
+        baseUrl: "https://api.asgardeo.io/t/demoorg",
         clientID: "CLIENT_ID",
         clientSecret: "CLIENT_SECRET",
         authorizedRedirectUrl: "https://example.app/callback",
@@ -193,7 +193,7 @@ describe(AsgardeoStrategy, () => {
 
     fetchMock.once(
       JSON.stringify({
-        access_token: "access token",
+        access_token: "access_token",
         scope: "custom",
         expires_in: 86_400,
         token_type: "Bearer",
@@ -208,7 +208,7 @@ describe(AsgardeoStrategy, () => {
     });
 
     expect(verify).toHaveBeenLastCalledWith({
-      accessToken: "access token",
+      accessToken: "access_token",
       refreshToken: undefined,
       request,
       extraParams: {
@@ -217,7 +217,7 @@ describe(AsgardeoStrategy, () => {
         token_type: "Bearer",
       },
       profile: {
-        provider: "Asgardeo",
+        provider: "asgardeo",
       },
       context,
     });
@@ -226,7 +226,7 @@ describe(AsgardeoStrategy, () => {
   test("should fetch minimal user profile when only openid scope is present", async () => {
     let strategy = new AsgardeoStrategy(
       {
-        baseUrl: "https://api.asgardeo.io/t/paviduorg",
+        baseUrl: "https://api.asgardeo.io/t/demoorg",
         clientID: "CLIENT_ID",
         clientSecret: "CLIENT_SECRET",
         authorizedRedirectUrl: "https://example.app/callback",
@@ -252,7 +252,7 @@ describe(AsgardeoStrategy, () => {
     fetchMock
       .once(
         JSON.stringify({
-          access_token: "access token",
+          access_token: "access_token",
           id_token: "id token",
           scope: "openid",
           expires_in: 86_400,
@@ -269,13 +269,13 @@ describe(AsgardeoStrategy, () => {
     });
 
     const profile: AsgardeoProfile = {
-      provider: "Asgardeo",
+      provider: "asgardeo",
       _json: userInfo,
       id: "subject",
     };
 
     expect(verify).toHaveBeenLastCalledWith({
-      accessToken: "access token",
+      accessToken: "access_token",
       refreshToken: undefined,
       request,
       extraParams: {
@@ -292,7 +292,7 @@ describe(AsgardeoStrategy, () => {
   test("should fetch full user profile when openid, profile, and email scopes are present", async () => {
     let strategy = new AsgardeoStrategy(
       {
-        baseUrl: "https://api.asgardeo.io/t/paviduorg",
+        baseUrl: "https://api.asgardeo.io/t/demoorg",
         clientID: "CLIENT_ID",
         clientSecret: "CLIENT_SECRET",
         authorizedRedirectUrl: "https://example.app/callback",
@@ -316,7 +316,7 @@ describe(AsgardeoStrategy, () => {
       name: "John Doe",
       given_name: "John",
       family_name: "Doe",
-      middle_name: "Josephine",
+      middle_name: "Alexander",
       nickname: "JJ",
       preferred_username: "j.doe",
       profile: "http://exampleco.com/janedoe",
@@ -341,7 +341,7 @@ describe(AsgardeoStrategy, () => {
     fetchMock
       .once(
         JSON.stringify({
-          access_token: "access token",
+          access_token: "access_token",
           id_token: "id token",
           scope: "openid profile email",
           expires_in: 86_400,
@@ -358,14 +358,14 @@ describe(AsgardeoStrategy, () => {
     });
 
     const profile: AsgardeoProfile = {
-      provider: "Asgardeo",
+      provider: "asgardeo",
       _json: userInfo,
       id: "248289761001",
-      displayName: "Jane Josephine Doe",
+      displayName: "John Doe",
       name: {
         familyName: "Doe",
-        givenName: "Jane",
-        middleName: "Josephine",
+        givenName: "John",
+        middleName: "Alexander",
       },
       emails: [{ value: "janedoe@exampleco.com" }],
       photos: [{ value: "http://exampleco.com/janedoe/me.jpg" }],
@@ -374,7 +374,7 @@ describe(AsgardeoStrategy, () => {
     };
 
     expect(verify).toHaveBeenLastCalledWith({
-      accessToken: "access token",
+      accessToken: "access_token",
       refreshToken: undefined,
       request,
       extraParams: {
@@ -391,7 +391,7 @@ describe(AsgardeoStrategy, () => {
   test("should allow additional search params", async () => {
     let strategy = new AsgardeoStrategy(
       {
-        baseUrl: "https://api.asgardeo.io/t/paviduorg",
+        baseUrl: "https://api.asgardeo.io/t/demoorg",
         clientID: "CLIENT_ID",
         clientSecret: "CLIENT_SECRET",
         authorizedRedirectUrl: "https://example.app/callback",
