@@ -1,49 +1,190 @@
-import { SessionStorage } from "@remix-run/server-runtime";
 import {
-  AuthenticateOptions,
-  Strategy,
-  StrategyVerifyCallback,
-} from "remix-auth";
+  OAuth2Profile,
+  OAuth2Strategy,
+  OAuth2StrategyVerifyParams,
+} from "remix-auth-oauth2";
+import type { StrategyVerifyCallback } from "remix-auth";
 
-/**
- * This interface declares what configuration the strategy needs from the
- * developer to correctly work.
- */
-export interface MyStrategyOptions {
-  something: "You may need";
+export interface AsgardeoStrategyOptions {
+  baseUrl: string;
+  clientID: string;
+  clientSecret: string;
+  authorizedRedirectUrl: string;
+  scope?: AsgardeoScope[] | string;
+  audience?: string;
+  organization?: string;
 }
 
 /**
- * This interface declares what the developer will receive from the strategy
- * to verify the user identity in their system.
+ * standard claims
  */
-export interface MyStrategyVerifyParams {
-  something: "Dev may need";
+export type AsgardeoScope = "openid" | "profile" | "email" | string;
+
+export interface AsgardeoProfile extends OAuth2Profile {
+  _json?: AsgardeoUserInfo;
+  organizationId?: string;
+  organizationName?: string;
 }
 
-export class MyStrategy<User> extends Strategy<User, MyStrategyVerifyParams> {
-  name = "change-me";
+export interface AsgardeoExtraParams extends Record<string, unknown> {
+  id_token?: string;
+  scope: string;
+  expires_in: number;
+  token_type: "Bearer";
+}
+
+interface AsgardeoUserInfo {
+  sub?: string;
+  name?: string;
+  given_name?: string;
+  family_name?: string;
+  middle_name?: string;
+  nickname?: string;
+  preferred_username?: string;
+  profile?: string;
+  picture?: string;
+  website?: string;
+  email?: string;
+  email_verified?: boolean;
+  gender?: string;
+  birthdate?: string;
+  zoneinfo?: string;
+  locale?: string;
+  phone_number?: string;
+  phone_number_verified?: boolean;
+  address?: {
+    country?: string;
+  };
+  updated_at?: string;
+  org_id?: string;
+  org_name?: string;
+}
+
+export const AsgardeoStrategyDefaultName = "asgardeo";
+export const AsgardeoStrategyDefaultScope: AsgardeoScope = "openid profile email";
+export const AsgardeoStrategyScopeSeperator = " ";
+
+export class AsgardeoStrategy<User> extends OAuth2Strategy<
+  User,
+  AsgardeoProfile,
+  AsgardeoExtraParams
+> {
+  name = AsgardeoStrategyDefaultName;
+
+  private userInfoURL: string;
+  private scope: AsgardeoScope[];
+  private audience?: string;
+  private organization?: string;
+  private invitation?: string;
+  private connection?: string;
+  private fetchProfile: boolean;
 
   constructor(
-    options: MyStrategyOptions,
-    verify: StrategyVerifyCallback<User, MyStrategyVerifyParams>
+    options: AsgardeoStrategyOptions,
+    verify: StrategyVerifyCallback<
+      User,
+      OAuth2StrategyVerifyParams<AsgardeoProfile, AsgardeoExtraParams>
+    >,
   ) {
-    super(verify);
-    // do something with the options here
+    super(
+      {
+        authorizationURL: `${options.baseUrl}/oauth2/authorize`,
+        tokenURL: `${options.baseUrl}/oauth2/token`,
+        clientID: options.clientID,
+        clientSecret: options.clientSecret,
+        callbackURL: options.authorizedRedirectUrl,
+      },
+      verify,
+    );
+
+    this.userInfoURL = `${options.baseUrl}/oauth2/userinfo`;
+    this.scope = this.getScope(options.scope);
+    this.audience = options.audience;
+    this.organization = options.organization;
+    this.fetchProfile = this.scope
+      .join(AsgardeoStrategyScopeSeperator)
+      .includes("openid");
   }
 
-  async authenticate(
-    request: Request,
-    sessionStorage: SessionStorage,
-    options: AuthenticateOptions
-  ): Promise<User> {
-    return await this.failure(
-      "Implement me!",
-      request,
-      sessionStorage,
-      options
-    );
-    // Uncomment me to do a success response
-    // this.success({} as User, request, sessionStorage, options);
+  // Allow users the option to pass a scope string, or typed array
+  private getScope(scope: AsgardeoStrategyOptions["scope"]) {
+    if (!scope) {
+      return [AsgardeoStrategyDefaultScope];
+    } else if (typeof scope === "string") {
+      return scope.split(AsgardeoStrategyScopeSeperator) as AsgardeoScope[];
+    }
+
+    return scope;
+  }
+
+  protected authorizationParams(params: URLSearchParams) {
+    params.set("scope", this.scope.join(AsgardeoStrategyScopeSeperator));
+    if (this.audience) {
+      params.set("audience", this.audience);
+    }
+    if (this.organization) {
+      params.set("organization", this.organization);
+    }
+    
+    return params;
+  }
+
+  protected async userProfile(accessToken: string): Promise<AsgardeoProfile> {
+    let profile: AsgardeoProfile = {
+      provider: AsgardeoStrategyDefaultName,
+    };
+
+    if (!this.fetchProfile) {
+      return profile;
+    }
+
+    let response = await fetch(this.userInfoURL, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    let data: AsgardeoUserInfo = await response.json();
+
+    profile._json = data;
+
+    if (data.sub) {
+      profile.id = data.sub;
+    }
+
+    if (data.name) {
+      profile.displayName = data.name;
+    }
+
+    if (data.family_name || data.given_name || data.middle_name) {
+      profile.name = {};
+
+      if (data.family_name) {
+        profile.name.familyName = data.family_name;
+      }
+
+      if (data.given_name) {
+        profile.name.givenName = data.given_name;
+      }
+
+      if (data.middle_name) {
+        profile.name.middleName = data.middle_name;
+      }
+    }
+
+    if (data.email) {
+      profile.emails = [{ value: data.email }];
+    }
+
+    if (data.picture) {
+      profile.photos = [{ value: data.picture }];
+    }
+
+    if (data.org_id) {
+      profile.organizationId = data.org_id;
+    }
+
+    if (data.org_name) {
+      profile.organizationName = data.org_name;
+    }
+
+    return profile;
   }
 }
