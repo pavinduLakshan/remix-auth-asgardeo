@@ -179,20 +179,12 @@ jobs:
         id: run-jest-test-and-coverage
         run: pnpm test:ci
 
-      - name: Upload `@asgardeo/js` coverage reports to Codecov
+      - name: Upload `@asgardeo/remix-auth-asgardeo` coverage reports to Codecov
         id: upload-asgardeo-js-coverage
         uses: codecov/codecov-action@v4.0.1
         with:
-          files: ./packages/core/coverage/coverage-final.json
-          flags: '@asgardeo/js'
-          token: ${{ secrets.CODECOV_TOKEN }}
-
-      - name: Upload `@asgardeo/react` coverage reports to Codecov
-        id: upload-asgardeo-react-coverage
-        uses: codecov/codecov-action@v4.0.1
-        with:
-          files: ./packages/core/coverage/coverage-final.json
-          flags: '@asgardeo/react'
+          files: ./lib/coverage/coverage-final.json
+          flags: '@asgardeo/remix-auth-asgardeo'
           token: ${{ secrets.CODECOV_TOKEN }}
 
   build:
