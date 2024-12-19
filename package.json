@@ -24,6 +24,7 @@
     "build": "nx run-many --target=build --parallel",
     "changeset": "changeset",
     "lint": "nx run-many --target=lint --parallel",
+    "lint:fix": "nx run-many --target=lint:fix --parallel",
     "publish:packages": "changeset publish",
     "test": "nx run-many --target=test --parallel",
     "typecheck": "nx run-many --target=typecheck --parallel",

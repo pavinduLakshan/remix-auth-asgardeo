@@ -16,27 +16,23 @@
  * under the License.
  */
 
-import {
-  OAuth2Profile,
-  OAuth2Strategy,
-  OAuth2StrategyVerifyParams,
-} from "remix-auth-oauth2";
-import type { StrategyVerifyCallback } from "remix-auth";
+import type {StrategyVerifyCallback} from 'remix-auth';
+import {OAuth2Profile, OAuth2Strategy, OAuth2StrategyVerifyParams} from 'remix-auth-oauth2';
 
 export interface AsgardeoStrategyOptions {
+  audience?: string;
+  authorizedRedirectUrl: string;
   baseUrl: string;
   clientID: string;
   clientSecret: string;
-  authorizedRedirectUrl: string;
-  scope?: AsgardeoScope[] | string;
-  audience?: string;
   organization?: string;
+  scope?: AsgardeoScope[] | string;
 }
 
 /**
  * standard claims
  */
-export type AsgardeoScope = "openid" | "profile" | "email" | string;
+export type AsgardeoScope = 'openid' | 'profile' | 'email' | string;
 
 export interface AsgardeoProfile extends OAuth2Profile {
   _json?: AsgardeoUserInfo;
@@ -45,64 +41,63 @@ export interface AsgardeoProfile extends OAuth2Profile {
 }
 
 export interface AsgardeoExtraParams extends Record<string, unknown> {
+  expires_in: number;
   id_token?: string;
   scope: string;
-  expires_in: number;
-  token_type: "Bearer";
+  token_type: 'Bearer';
 }
 
 interface AsgardeoUserInfo {
-  sub?: string;
-  name?: string;
-  given_name?: string;
-  family_name?: string;
-  middle_name?: string;
-  nickname?: string;
-  preferred_username?: string;
-  profile?: string;
-  picture?: string;
-  website?: string;
-  email?: string;
-  email_verified?: boolean;
-  gender?: string;
-  birthdate?: string;
-  zoneinfo?: string;
-  locale?: string;
-  phone_number?: string;
-  phone_number_verified?: boolean;
   address?: {
     country?: string;
   };
-  updated_at?: string;
+  birthdate?: string;
+  email?: string;
+  email_verified?: boolean;
+  family_name?: string;
+  gender?: string;
+  given_name?: string;
+  locale?: string;
+  middle_name?: string;
+  name?: string;
+  nickname?: string;
   org_id?: string;
   org_name?: string;
+  phone_number?: string;
+  phone_number_verified?: boolean;
+  picture?: string;
+  preferred_username?: string;
+  profile?: string;
+  sub?: string;
+  updated_at?: string;
+  website?: string;
+  zoneinfo?: string;
 }
 
-export const AsgardeoStrategyDefaultName = "asgardeo";
-export const AsgardeoStrategyDefaultScope: AsgardeoScope = "openid profile email";
-export const AsgardeoStrategyScopeSeperator = " ";
+export const AsgardeoStrategyDefaultName = 'asgardeo';
+export const AsgardeoStrategyDefaultScope: AsgardeoScope = 'openid profile email';
+export const AsgardeoStrategyScopeSeperator = ' ';
 
-export class AsgardeoStrategy<User> extends OAuth2Strategy<
-  User,
-  AsgardeoProfile,
-  AsgardeoExtraParams
-> {
+export class AsgardeoStrategy<User> extends OAuth2Strategy<User, AsgardeoProfile, AsgardeoExtraParams> {
   override name = AsgardeoStrategyDefaultName;
 
   private userInfoURL: string;
+
   private scope: AsgardeoScope[];
+
   private audience?: string;
+
   private organization?: string;
+
   private invitation?: string;
+
   private connection?: string;
+
   private fetchProfile: boolean;
 
   constructor(
     options: AsgardeoStrategyOptions,
-    verify: StrategyVerifyCallback<
-      User,
-      OAuth2StrategyVerifyParams<AsgardeoProfile, AsgardeoExtraParams>
-    >,
+    verify: StrategyVerifyCallback<User, OAuth2StrategyVerifyParams<AsgardeoProfile, AsgardeoExtraParams>>,
   ) {
     super(
       {
@@ -119,16 +114,15 @@ export class AsgardeoStrategy<User> extends OAuth2Strategy<
     this.scope = this.getScope(options.scope);
     this.audience = options.audience;
     this.organization = options.organization;
-    this.fetchProfile = this.scope
-      .join(AsgardeoStrategyScopeSeperator)
-      .includes("openid");
+    this.fetchProfile = this.scope.join(AsgardeoStrategyScopeSeperator).includes('openid');
   }
 
   // Allow users the option to pass a scope string, or typed array
-  private getScope(scope: AsgardeoStrategyOptions["scope"]) {
+  private getScope(scope: AsgardeoStrategyOptions['scope']) {
     if (!scope) {
       return [AsgardeoStrategyDefaultScope];
-    } else if (typeof scope === "string") {
+    }
+    if (typeof scope === 'string') {
       return scope.split(AsgardeoStrategyScopeSeperator) as AsgardeoScope[];
     }
 
@@ -136,19 +130,19 @@ export class AsgardeoStrategy<User> extends OAuth2Strategy<
   }
 
   protected override authorizationParams(params: URLSearchParams) {
-    params.set("scope", this.scope.join(AsgardeoStrategyScopeSeperator));
+    params.set('scope', this.scope.join(AsgardeoStrategyScopeSeperator));
     if (this.audience) {
-      params.set("audience", this.audience);
+      params.set('audience', this.audience);
     }
     if (this.organization) {
-      params.set("organization", this.organization);
+      params.set('organization', this.organization);
     }
 
     return params;
   }
 
   protected override async userProfile(accessToken: string): Promise<AsgardeoProfile> {
-    let profile: AsgardeoProfile = {
+    const profile: AsgardeoProfile = {
       provider: AsgardeoStrategyDefaultName,
     };
 
@@ -156,10 +150,10 @@ export class AsgardeoStrategy<User> extends OAuth2Strategy<
       return profile;
     }
 
-    let response = await fetch(this.userInfoURL, {
-      headers: { Authorization: `Bearer ${accessToken}` },
+    const response = await fetch(this.userInfoURL, {
+      headers: {Authorization: `Bearer ${accessToken}`},
     });
-    let data: AsgardeoUserInfo = await response.json();
+    const data: AsgardeoUserInfo = await response.json();
 
     profile._json = data;
 
@@ -188,11 +182,11 @@ export class AsgardeoStrategy<User> extends OAuth2Strategy<
     }
 
     if (data.email) {
-      profile.emails = [{ value: data.email }];
+      profile.emails = [{value: data.email}];
     }
 
     if (data.picture) {
-      profile.photos = [{ value: data.picture }];
+      profile.photos = [{value: data.picture}];
     }
 
     if (data.org_id) {
