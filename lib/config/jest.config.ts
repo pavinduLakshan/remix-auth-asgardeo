@@ -16,11 +16,20 @@
  * under the License.
  */
 
-module.exports = {
-  env: {
-    es6: true,
-    node: true,
+import * as path from 'path';
+import type {Config} from '@jest/types';
+// eslint-disable-next-line unicorn/prefer-node-protocol
+// eslint-disable-next-line unicorn/import-style
+
+const config: Config.InitialOptions = {
+  verbose: Boolean(process.env.CI),
+  rootDir: path.resolve('.'),
+  collectCoverageFrom: ['<rootDir>/src/**/*.ts'],
+  setupFilesAfterEnv: ['<rootDir>/config/jest/setup.ts'],
+  testMatch: ['<rootDir>/test/**/*.test.ts'],
+  transform: {
+    '\\.[jt]sx?$': ['babel-jest', {configFile: './config/jest/babel.config.js'}],
   },
-  extends: ['plugin:@wso2/internal', 'plugin:@wso2/prettier'],
-  plugins: ['@wso2'],
 };
+
+export default config;
