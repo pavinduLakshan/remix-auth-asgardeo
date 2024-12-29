@@ -43,7 +43,10 @@ Head over to [Asgardeo](https://wso2.com/asgardeo) and sign up for an organizati
 
 ### Register an application
 
-Follow the steps on the [Asgardeo documentation](https://wso2.com/asgardeo/docs/guides/applications/register-oidc-web-app/) to create an application and get the client ID, and client secret.
+Follow the steps on the [Asgardeo documentation](https://wso2.com/asgardeo/docs/guides/applications/register-oidc-web-app/) to create an application and get the client ID, and client secret. Provide the following values when required.
+
+ - Authorized redirect URL: `http://localhost:5173/auth/asgardeo/callback`
+ - Allowed origins: `http://localhost:5173`
 
 ### Create the Asgardeo strategy instance
 
