@@ -11,6 +11,32 @@ The Asgardeo strategy, which extends the OAuth2Strategy, is used to authenticate
 
 ## How to use
 
+### Install the dependency
+
+Using NPM:
+
+```shell
+npm i @asgardeo/remix-auth-asgardeo
+```
+
+Using Yarn:
+
+```shell
+yarn add @asgardeo/remix-auth-asgardeo
+```
+
+Using PNPM:
+
+```shell
+pnpm add @asgardeo/remix-auth-asgardeo
+```
+
+Using Bun:
+
+```shell
+bun add @asgardeo/remix-auth-asgardeo
+```
+
 ### Create an Asgardeo organization
 
 Head over to [Asgardeo](https://wso2.com/asgardeo) and sign up for an organization.
